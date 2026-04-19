@@ -1,0 +1,42 @@
+### 1. Auto approve
+POST http://localhost:7071/api/start
+Content-Type: application/json
+
+{
+  "employeeName": "John",
+  "employeeEmail": "john@test.com",
+  "amount": 50,
+  "category": "travel",
+  "description": "Taxi",
+  "managerEmail": "mgr@test.com"
+}
+
+### 2. Manager required
+POST http://localhost:7071/api/start
+Content-Type: application/json
+
+{
+  "employeeName": "Jane",
+  "employeeEmail": "jane@test.com",
+  "amount": 200,
+  "category": "equipment",
+  "description": "Laptop",
+  "managerEmail": "mgr@test.com"
+}
+
+### 3. Send approval (replace ID)
+# POST http://localhost:7071/api/approve/d76b043548cf4f898a7fda59ded0d9dc
+# POST http://localhost:7071/api/approve/{instanceId}
+Content-Type: application/json
+
+{
+  "decision": "approved"
+}
+
+### 4. Send rejection
+POST http://localhost:7071/api/approve/{instanceId}
+Content-Type: application/json
+
+{
+  "decision": "rejected"
+}

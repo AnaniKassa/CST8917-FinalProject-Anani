@@ -1,0 +1,25 @@
+### Test expense (auto-approve)
+POST https://func-expense-b-eqg4gsa5hre5excs.canadacentral-01.azurewebsites.net/api/submit_expense
+Content-Type: application/json
+
+{
+  "employeeName": "Jeff Boomer",
+  "employeeEmail": "your-email@gmail.com",
+  "amount": 50,
+  "category": "travel",
+  "description": "Taxi",
+  "managerEmail": "your-email@gmail.com"
+}
+
+### Test expense (manager flow)
+POST https://func-expense-b-eqg4gsa5hre5excs.canadacentral-01.azurewebsites.net/api/submit_expense
+Content-Type: application/json
+
+{
+  "employeeName": "Tania Jones",
+  "employeeEmail": "your-email@gmail.com",
+  "amount": 500,
+  "category": "equipment",
+  "description": "Laptop",
+  "managerEmail": "your-email@gmail.com"
+}

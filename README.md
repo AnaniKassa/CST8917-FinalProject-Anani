@@ -2,9 +2,9 @@
 
 **Course:** CST8917 — Serverless Applications  
 **Project:** Dual implementation of an Expense Approval Workflow  
-**Student:** [Your Name]  
-**Student Number:** [Your Student Number]  
-**Date:** [YYYY-MM-DD]
+**Student:** Anani Thierry Kassa  
+**Student Number:** 041140713  
+**Date:** 2026-04-21
 
 ---
 
@@ -127,56 +127,7 @@ Then install packages in your virtual environment:
 ```bash
 python -m pip install -r requirements.txt
 ```
-
-#### Step 3 — Configure local settings
-
-Create `local.settings.example.json` with placeholder values only.
-
-Example:
-
-```json
-{
-  "IsEncrypted": false,
-  "Values": {
-    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-    "FUNCTIONS_WORKER_RUNTIME": "python",
-    "SENDGRID_API_KEY": "your-sendgrid-api-key",
-    "EMAIL_FROM": "your-verified-sender@example.com",
-    "EMAIL_TO_DEFAULT": "employee@example.com",
-    "APPROVAL_TIMEOUT_MINUTES": "30"
-  }
-}
-```
-
-Keep real secrets out of GitHub.
-
-#### Step 4 — Define the expense payload
-
-Your request body should contain at least:
-
-- `employeeName`
-- `employeeEmail`
-- `amount`
-- `category`
-- `description`
-- `managerEmail`
-
-Use one JSON shape for both versions so the comparison is fair.
-
-Example:
-
-```json
-{
-  "employeeName": "Jane Doe",
-  "employeeEmail": "jane.doe@example.com",
-  "amount": 175,
-  "category": "travel",
-  "description": "Taxi and hotel for client visit",
-  "managerEmail": "manager@example.com"
-}
-```
-
-#### Step 5 — Implement the function roles
+#### Step 3 — Implement the function roles
 
 In `function_app.py`, create these functions:
 
@@ -203,7 +154,7 @@ In `function_app.py`, create these functions:
 6. **Manager response HTTP function**  
    Accepts manager approval/rejection and raises a durable event to the waiting orchestration.
 
-#### Step 6 — Build the orchestrator logic
+#### Step 4 — Build the orchestrator logic
 
 Use this sequence in the orchestrator:
 
@@ -223,7 +174,7 @@ Use this sequence in the orchestrator:
 
 This is the part that demonstrates the Durable Functions **Human Interaction pattern**.
 
-#### Step 7 — Add the manager response endpoint
+#### Step 5 — Add the manager response endpoint
 
 Add a route such as:
 
@@ -240,7 +191,7 @@ That endpoint should:
 
 Use it to simulate the manager approving or rejecting requests during testing.
 
-#### Step 8 — Test locally with `test-durable.http`
+#### Step 6 — Test locally with `test-durable.http`
 
 Create `version-a-durable-functions/test-durable.http` with test cases for:
 
@@ -253,14 +204,14 @@ Create `version-a-durable-functions/test-durable.http` with test cases for:
 
 For the approval/rejection cases, first start the orchestration, then call the manager response endpoint with the returned instance ID.
 
-#### Step 9 — Run Azurite and start the app
+#### Step 7 — Run Azurite and start the app
 
 1. Start **Azurite**.
 2. Run the function app locally in VS Code.
 3. Confirm the endpoints appear in the terminal.
 4. Run your HTTP tests.
 
-#### Step 10 — Deploy to Azure
+#### Step 8 — Deploy to Azure
 
 1. Create a **Function App** in Azure.
 2. Use the same runtime and region as your storage account.
@@ -268,15 +219,8 @@ For the approval/rejection cases, first start the orchestration, then call the m
 4. Deploy from VS Code.
 5. Retest all scenarios in Azure.
 
-### 4.4 What to capture for evidence
-
-Save screenshots of:
-
-- the orchestration runs
-- validation failures
-- approved and rejected outcomes
-- timeout/escalation outcome
-- email notification evidence
+### 4.4 Challenges
+The main challenge in Version A is correctly implementing the **Human Interaction pattern** with Durable Functions. You need to manage timers and external events carefully to avoid issues like orphaned timers or missed events. Testing this flow locally can also be tricky, especially simulating the manager response and ensuring the orchestration reacts correctly to timeouts.
 
 ---
 
@@ -368,26 +312,8 @@ azure-data-tables
 
 If you create a helper function to submit test requests, the Service Bus SDK will let you push messages into the queue from your local HTTP test file.
 
-#### Step 4 — Configure local settings
 
-Create `local.settings.example.json` with placeholders:
-
-```json
-{
-  "IsEncrypted": false,
-  "Values": {
-    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-    "FUNCTIONS_WORKER_RUNTIME": "python",
-    "SERVICEBUS_CONNECTION_STRING": "your-service-bus-connection-string",
-    "SERVICEBUS_QUEUE_NAME": "expense-requests",
-    "SERVICEBUS_TOPIC_NAME": "expense-outcomes",
-    "APPROVAL_TABLE_NAME": "ExpenseApprovals",
-    "APPROVAL_TIMEOUT_MINUTES": "30"
-  }
-}
-```
-
-#### Step 5 — Implement the helper functions
+#### Step 4 — Implement the helper functions
 
 A practical Version B project can include:
 
@@ -404,7 +330,7 @@ A practical Version B project can include:
 
 If you use a table to store approval status, the helper can write a decision into that table.
 
-#### Step 6 — Build the Logic App flow
+#### Step 5 — Build the Logic App flow
 
 Your Logic App should follow this order:
 
@@ -438,7 +364,7 @@ Your Logic App should follow this order:
 8. **Publish outcome to the Service Bus topic**
    - Label the message as `approved`, `rejected`, or `escalated`
 
-#### Step 7 — Create the email actions
+#### Step 6 — Create the email actions
 
 Inside the Logic App:
 
@@ -455,7 +381,7 @@ Make the subject line and body include:
 - final decision
 - any manager comments if applicable
 
-#### Step 8 — Publish outcome messages
+#### Step 7 — Publish outcome messages
 
 When the Logic App finishes processing, publish the result to `expense-outcomes` with the matching label.
 
@@ -474,112 +400,115 @@ Include scenarios for:
 5. missing required fields
 6. invalid category
 
-#### Step 10 — Capture screenshots
-
-Save screenshots of:
-
-- Service Bus queue and topic
-- subscription filters
-- Logic App run history
-- validation success and failure
-- approval and rejection branches
-- timeout / escalation branch
-- received emails
-
-### 5.5 What to document in your README
-
-For Version B, explain:
-
-- why you picked your manager approval workaround
-- how the Logic App decides the final outcome
-- how Service Bus is used for decoupling
-- how the subscriptions route the results
+#### Step 8 — Challenge
+  
+Had hard time setting up the manager approval flow in Logic Apps. The polling loop approach is not ideal but it’s a practical workaround to demonstrate waiting for human input without Durable Functions.
 
 ---
 
-## 6. Comparison Analysis
+## 6. Comparison Analysis (Full 800-1200 word comparison)
 
-Write a comparison of **800 to 1200 words** covering:
+This project compares two approaches for building an expense approval workflow: Version A using Azure Durable Functions and Version B using Azure Logic Apps with Service Bus. Both solutions achieve the same functional goal—processing expense requests, validating inputs, handling approvals, and notifying users—but they differ significantly in architecture, complexity, and maintainability.
 
-1. Development Experience
-2. Testability
-3. Error Handling
-4. Human Interaction Pattern
-5. Observability
-6. Cost
+**Architecture and Design**
 
-### Suggested way to compare
+Durable Functions follows a code-first architecture, where the entire workflow is defined programmatically using an orchestrator function and multiple activity functions. The orchestrator acts as the central controller, coordinating each step in a clear and structured manner. This results in a single, cohesive workflow that is easy to follow and reason about.
 
-Use specific examples from your build experience:
+In contrast, Logic Apps with Service Bus uses a low-code, event-driven architecture. The workflow is visually designed using triggers, conditions, and actions. Service Bus introduces a messaging layer that decouples components. Instead of one central orchestrator, the logic is distributed across multiple steps and services, making the system more modular but also more complex to track.
 
-- what was faster to implement
-- what was easier to debug in VS Code or Azure Portal
-- which version made timeout handling easier
-- which version gave clearer run history
-- which version felt simpler for production scaling
-- what you estimate at low and high usage
+**Orchestration and Workflow Control**
 
-### Recommendation
+One of the biggest differences lies in orchestration.
 
-End with a recommendation of **200 to 300 words** stating:
+Durable Functions provides built-in orchestration capabilities, allowing the system to:
 
-- which approach you would choose for production
-- why you would choose it
-- when the other approach would be a better fit
+- Wait for external events (e.g., manager approval)
+- Handle timeouts natively
+- Maintain execution state automatically
 
----
+This makes implementing workflows with delays or human interaction straightforward. For example, waiting for a manager’s decision or escalating after a timeout can be handled cleanly within the orchestrator.
 
-## 7. Presentation
+Logic Apps, on the other hand, requires manual orchestration. Developers must combine conditions, delays, and variables to simulate workflow behavior. While this works, it is less intuitive and can lead to errors. For example, simulating a manager approval step required using a delay and conditional logic rather than a true event-based mechanism.
 
-Your presentation should include:
+**State Management**
 
-1. Introduction
-2. Version A architecture and demo
-3. Version B architecture and demo
-4. Comparison summary
-5. Recommendation
-6. Lessons learned
+State management is another key differentiator.
 
-Keep your screenshots and diagrams organized while you build, because they will save time when creating the slides.
+Durable Functions automatically manages state between steps. The orchestration context preserves data across executions, making it ideal for long-running workflows.
 
----
+Logic Apps requires explicit state handling. Variables must be initialized and updated manually, or external storage (such as tables) must be used. This increases complexity and introduces potential issues if not handled carefully.
 
-## 8. AI Disclosure
+**Scalability and Decoupling**
 
-Add a short disclosure section that says how AI was used, or state that no AI was used.
+Logic Apps combined with Service Bus offers strong decoupling and scalability.
 
-Example:
+- Service Bus queues allow asynchronous processing of incoming requests
+- Topics and subscriptions enable routing of outcomes (approved, rejected, escalated)
+- Components can scale independently
 
-> AI was used to help organize the project structure, clarify Azure service choices, and draft documentation. All final code, testing, and deployment were completed and verified by me.
+This makes Version B more suitable for distributed systems and enterprise-scale applications.
 
----
+Durable Functions also scales, but it is more tightly coupled, as all logic resides within the orchestrator. While this simplifies development, it reduces flexibility in highly distributed architectures.
+  
+**Development Experience**
+  
+Durable Functions provides a developer-friendly experience, especially for those comfortable with programming. Writing logic in Python allows better control, easier debugging, and cleaner version management.
 
-## 9. Suggested Build Order
+Logic Apps offers a visual, low-code experience, which is easier for beginners or non-developers. However, as workflows grow more complex, the visual design can become cluttered, and managing expressions or data transformations can be challenging.
+  
+**Integration Capabilities**
+  
+Logic Apps has a clear advantage in integration. It provides built-in connectors for services such as email, HTTP APIs, and messaging systems. This allows rapid development without writing much code.
 
-Follow this order so you do not get stuck:
+Durable Functions requires manual integration using SDKs or API calls. While more flexible, it increases development effort.
+  
+**Error Handling and Debugging**
+  
+Durable Functions offers structured logging and a clear execution flow within the orchestrator, making debugging more straightforward.
 
-1. Build **Version A** first.
-2. Test all six scenarios.
-3. Deploy Version A.
-4. Build **Version B** next.
-5. Test all six scenarios.
-6. Deploy Version B.
-7. Write the comparison after both versions are working.
-8. Build slides last.
+Logic Apps provides a visual run history, which is helpful, but debugging can become difficult when workflows contain many nested conditions and actions. Errors such as invalid JSON or incorrect expressions are common and sometimes harder to trace.
+  
+**Cost and Maintainability**
 
-This order helps because Version A teaches the orchestration logic, and Version B becomes easier once the workflow is already clear.
+Durable Functions generally has a lower cost for compute-based workflows, as billing is based on execution time.
 
----
+Logic Apps uses a per-action pricing model, which can become expensive as the number of steps increases. Service Bus also adds additional cost.
 
-## 10. References
+In terms of maintainability, Durable Functions is easier to manage for developers due to structured code and clear logic. Logic Apps can become harder to maintain over time due to visual complexity and scattered logic.
+  
+**Conclusion**
 
-Add your final references here, including Azure documentation and any learning resources you used while building.
+Both approaches have strengths, but they serve different purposes. Durable Functions is better suited for workflows that require strong orchestration, state management, and developer control. Logic Apps with Service Bus is more appropriate for integration-heavy, distributed systems where decoupling and scalability are priorities.
 
 ---
 
-## 11. Notes
+## 7.Recommendation (200-300 word recommendation)
+  
+Based on the comparison, Azure Durable Functions is the recommended approach for this expense approval system, especially in scenarios requiring structured workflows, state management, and reliability.
+  
+Durable Functions provides a cleaner and more maintainable solution by handling orchestration, state persistence, and event waiting natively. The ability to wait for external events (such as manager approval) and handle timeouts in a straightforward manner significantly reduces complexity and potential errors. This makes it ideal for workflows that involve multiple steps and decision points.
+  
+While Logic Apps combined with Service Bus offers strong integration capabilities and better decoupling, it introduces additional complexity in workflow design and state handling. The need to manually simulate approval logic and manage variables makes the solution harder to debug and maintain. Additionally, the cost model based on action execution may become less efficient as the workflow grows.
+  
+However, Logic Apps remains a strong choice for integration-heavy environments or when working with teams that prefer low-code solutions.
+  
+In conclusion, for this project’s requirements—especially the need for controlled orchestration and timeout handling—Durable Functions offers a more robust, scalable, and developer-friendly solution.
+  
+---
 
-- Do not commit real secrets.
-- Keep `local.settings.json` out of GitHub.
-- Keep screenshots in the `screenshots/` folder for Version B.
-- Make sure your README matches the code you actually submit.
+## 8. References
+
+- Assignment lab 2 : https://github.com/AnaniKassa/26W_CST8917_Lab2/blob/main/README.md
+- Assignment lab 3 : https://github.com/AnaniKassa/26W_CST8917_Lab3/blob/main/README.md
+
+---
+
+## 9. AI Disclosure
+
+> Artificial Intelligence tools were used in a limited and supportive capacity during the completion of this project. Specifically, AI assistance was leveraged to help clarify technical concepts, troubleshoot errors during development (such as Azure Functions configuration and Logic Apps expressions), and improve the clarity and structure of written sections of the report.
+
+> All architectural decisions, implementation steps, and testing processes were performed and validated independently. The code for both Version A (Azure Durable Functions) and Version B (Azure Logic Apps with Service Bus), as well as the overall system design, were developed, tested, and refined by the author. AI-generated suggestions were reviewed critically and adapted as needed to fit the project requirements.
+
+> AI was not used to automatically generate the entire solution or replace understanding of the material. Instead, it served as a learning aid and productivity tool, similar to documentation or online resources.
+
+> This ensures that the final submission reflects the author’s own understanding, work, and implementation of the project.
